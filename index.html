@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#171044" />
+    <meta
+      name="description"
+      content="A touchscreen prototype for choosing a post-event departure option at Luna Park."
+    />
+    <title>Luna Park Departure Machine</title>
+    <link
+      rel="icon"
+      type="image/svg+xml"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23171044'/%3E%3Cpath d='M12 43h40v7H12zM17 36a15 15 0 0 1 30 0v7H17z' fill='%23ffd74f'/%3E%3Ccircle cx='26' cy='34' r='3' fill='%23171044'/%3E%3Ccircle cx='38' cy='34' r='3' fill='%23171044'/%3E%3Cpath d='M28 40h8' stroke='%23171044' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="kiosk-shell">
+      <header class="topbar">
+        <div class="brand" aria-label="Luna Park">
+          <span class="brand-mark" aria-hidden="true">LP</span>
+          <span>Luna Park</span>
+        </div>
+        <div class="step-indicator" aria-label="Progress">
+          <span id="stepLabel">Welcome</span>
+          <div class="step-dots" aria-hidden="true">
+            <i class="active"></i><i></i><i></i><i></i><i></i>
+          </div>
+        </div>
+      </header>
+
+      <main id="app" tabindex="-1">
+        <section class="screen start-screen active" data-screen="start">
+          <div class="start-visual" aria-hidden="true">
+            <div class="moon-orbit"></div>
+            <div class="card-illustration">
+              <span class="card-star">★</span>
+              <strong>FESTIVAL</strong>
+              <small>souvenir card</small>
+            </div>
+            <div class="card-slot"><span></span></div>
+          </div>
+          <div class="start-copy">
+            <p class="eyebrow">Post-event travel</p>
+            <h1>Luna Park<br />Departure Machine</h1>
+            <p class="lead">Please insert your festival card to begin.</p>
+            <button class="primary-button insert-button" id="insertCardButton">
+              <span class="button-icon" aria-hidden="true">▰</span>
+              Insert Card
+            </button>
+            <p class="helper-text">Prototype: tap the button to simulate inserting your card.</p>
+          </div>
+        </section>
+
+        <section class="screen options-screen" data-screen="options">
+          <div class="screen-heading">
+            <div>
+              <p class="eyebrow">Choose your journey</p>
+              <h2>How would you like to leave?</h2>
+            </div>
+            <p>Compare the estimated walk, wait and crowd level.</p>
+          </div>
+
+          <div class="option-grid" id="optionGrid" aria-label="Travel options"></div>
+
+          <div class="selection-panel" id="selectionPanel" aria-live="polite">
+            <div class="selection-placeholder" id="selectionPlaceholder">
+              <span aria-hidden="true">☝</span>
+              <p>Select a travel option to see more information.</p>
+            </div>
+            <div class="selection-details" id="selectionDetails" hidden>
+              <div>
+                <p class="selection-label">Your selection</p>
+                <h3 id="selectionTitle"></h3>
+                <p id="selectionDescription"></p>
+              </div>
+              <button class="primary-button" id="continueButton">Continue</button>
+            </div>
+          </div>
+        </section>
+
+        <section class="screen preview-screen" data-screen="preview">
+          <button class="text-button back-button" id="previewBackButton">
+            <span aria-hidden="true">‹</span> Back to travel options
+          </button>
+          <div class="preview-layout">
+            <div class="stamp-stage">
+              <p class="stage-label">Souvenir stamp preview</p>
+              <div class="stamp large" id="previewStamp" aria-label="Selected souvenir stamp"></div>
+              <span class="stamp-shadow" aria-hidden="true"></span>
+            </div>
+            <div class="preview-copy">
+              <p class="eyebrow">Ready to stamp?</p>
+              <h2>You selected: <span id="previewOption"></span></h2>
+              <p class="lead">This stamp will be added to your festival card.</p>
+              <div class="meaning-card">
+                <span aria-hidden="true">✦</span>
+                <div>
+                  <strong>A memory of your journey</strong>
+                  <p id="stampMeaning"></p>
+                </div>
+              </div>
+              <p class="confirm-note">After you confirm, the machine will stamp your card and prepare a personalised travel QR code.</p>
+              <div class="button-row">
+                <button class="secondary-button" id="previewBackButtonBottom">Back</button>
+                <button class="primary-button" id="confirmButton">Confirm</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="screen processing-screen" data-screen="processing" aria-live="polite">
+          <div class="processing-card">
+            <div class="machine-animation" aria-hidden="true">
+              <div class="machine-top"><span></span><span></span><span></span></div>
+              <div class="moving-card"><span id="processingSymbol">★</span></div>
+              <div class="machine-slot"></div>
+            </div>
+            <p class="eyebrow">Please wait</p>
+            <h2 id="processingTitle">Stamping your card…</h2>
+            <p id="processingMessage">Adding your chosen souvenir stamp.</p>
+            <div class="progress-track" aria-hidden="true"><span id="progressBar"></span></div>
+            <p class="do-not-remove">Please do not remove your card yet.</p>
+          </div>
+        </section>
+
+        <section class="screen result-screen" data-screen="result">
+          <div class="result-heading">
+            <p class="eyebrow">All set</p>
+            <h2>Your travel QR code is ready</h2>
+            <p>Scan it now or keep it on your souvenir card for later.</p>
+          </div>
+          <div class="result-layout">
+            <div class="qr-panel">
+              <div class="qr-frame">
+                <canvas id="qrCanvas" width="290" height="290" aria-label="Personalised travel QR code"></canvas>
+              </div>
+              <p class="qr-caption">Personalised for <strong id="qrOption"></strong></p>
+            </div>
+            <div class="result-details">
+              <div class="result-choice">
+                <div class="stamp small" id="resultStamp"></div>
+                <div>
+                  <span>Your selected option</span>
+                  <h3 id="resultOption"></h3>
+                </div>
+              </div>
+              <div class="info-callout">
+                <span aria-hidden="true">⌁</span>
+                <p>Scan this QR code to open your personalised Luna Park Departure Pass.</p>
+              </div>
+              <p class="demo-note">Your pass opens with this travel option selected. You can change it later without changing the stamp on your card.</p>
+              <button class="primary-button" id="finishButton">Finish &amp; Return Card</button>
+            </div>
+          </div>
+        </section>
+
+        <section class="screen complete-screen" data-screen="complete">
+          <div class="complete-icon" aria-hidden="true">✓</div>
+          <p class="eyebrow">Journey saved</p>
+          <h2>Your card is ready.</h2>
+          <p class="take-card">Please take your card.</p>
+          <div class="return-slot" aria-hidden="true">
+            <div class="returned-card"><span>★</span><small>FESTIVAL</small></div>
+            <div class="slot-mouth"></div>
+          </div>
+          <p class="thank-you">Thank you. Have a safe journey home!</p>
+          <button class="primary-button" id="restartButton">Start Again</button>
+        </section>
+      </main>
+
+      <footer>
+        <span>Prototype mode</span>
+        <span>No payment or live transport data</span>
+      </footer>
+    </div>
+
+    <script src="app.js"></script>
+  </body>
+</html>
